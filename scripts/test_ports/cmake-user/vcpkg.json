@@ -158,6 +158,10 @@
           "platform": "!uwp"
         },
         {
+          "$package": "Ice",
+          "name": "zeroc-ice"
+        },
+        {
           "$package": "ZLIB",
           "name": "zlib"
         }
