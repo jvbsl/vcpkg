@@ -46,4 +46,11 @@ foreach(z_vcpkg_ice_component IN ITEMS Freeze
         )
     endif()
 endforeach()
+
+# Workaround for static library names that do not contain library version in 3.7.9
+# To be removed when this is fixed in upstream, perhaps in 3.7.10: https://github.com/zeroc-ice/ice/issues/1502
+if("@VCPKG_LIBRARY_LINKAGE@" STREQUAL "static")
+	add_compile_definitions(VCPKG_USE_STATIC_ICE)
+endif()
+
 _find_package(${ARGS})

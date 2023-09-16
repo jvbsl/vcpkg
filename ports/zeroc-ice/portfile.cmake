@@ -7,6 +7,7 @@ vcpkg_from_github(
         mcppd_fix.patch
         no-werror.patch
         fix-missing-functional.patch
+        fix-static-libname-linking.patch # Probably to be removed in 3.7.10: https://github.com/zeroc-ice/ice/issues/1502
 )
 
 set(RELEASE_TRIPLET ${TARGET_TRIPLET}-rel)
@@ -315,5 +316,5 @@ list(FILTER PRLIBS INCLUDE REGEX ".*(([Ii]ce[Uu]til|[Ss]lice)d?\.([a-z]+))$")
 file(REMOVE ${PDLIBS} ${PRLIBS})
 
 file(INSTALL "${CURRENT_PORT_DIR}/vcpkg-ci-IceConfig.cmake" DESTINATION "${CURRENT_PACKAGES_DIR}/share/vcpkg-ci/cmake-user")
-file(INSTALL "${CURRENT_PORT_DIR}/vcpkg-cmake-wrapper.cmake" DESTINATION "${CURRENT_PACKAGES_DIR}/share/ice")
+configure_file("${CURRENT_PORT_DIR}/vcpkg-cmake-wrapper.cmake" "${CURRENT_PACKAGES_DIR}/share/ice/vcpkg-cmake-wrapper.cmake" @ONLY)
 vcpkg_install_copyright(FILE_LIST "${SOURCE_PATH}/LICENSE")
