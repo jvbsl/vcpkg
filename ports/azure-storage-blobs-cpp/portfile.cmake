@@ -1,8 +1,12 @@
+# NOTE: All changes made to this file will get overwritten by the next port release.
+# Please contribute your changes to https://github.com/Azure/azure-sdk-for-cpp.
+
 vcpkg_from_github(
     OUT_SOURCE_PATH SOURCE_PATH
     REPO Azure/azure-sdk-for-cpp
-    REF azure-storage-blobs_12.9.0
-    SHA512 10126fa8f34357d941cc7ac031c7811cdbf5fe998d2b6741e9e97325c67df5ed9c490ec42034d9b1ba56716e7de3b7283eb9059554d32b2f4d907e839b64b59f
+    REF "azure-storage-blobs_${VERSION}"
+    SHA512 119aef0e2398fa6e645cc635dc09a3addade71c8c723046d104a55016c846f3db653449582eb7a678352c8b8148ee38f33a5c2fd07b67cca7815690d2afdbd02
+    HEAD_REF main
 )
 
 if(EXISTS "${SOURCE_PATH}/sdk/storage/azure-storage-blobs")

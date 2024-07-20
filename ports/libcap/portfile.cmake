@@ -1,8 +1,12 @@
-vcpkg_from_git(
-    OUT_SOURCE_PATH SOURCE_PATH
-    URL git://git.kernel.org/pub/scm/libs/libcap/libcap.git
-    FETCH_REF "libcap-${VERSION}"
-    REF 3c7dda330bd9a154bb5b878d31fd591e4951fe17
+vcpkg_download_distfile(ARCHIVE
+    URLS "https://www.kernel.org/pub/linux/libs/security/linux-privs/libcap2/libcap-${VERSION}.tar.xz"
+         "https://www.mirrorservice.org/sites/ftp.kernel.org/pub/linux/libs/security/linux-privs/libcap2/libcap-${VERSION}.tar.xz"
+    FILENAME "libcap-${VERSION}.tar.xz"
+    SHA512 647c307dc451517da9d089495ab959b4a6fbbe41c79f4e1e9bb663569dad630ead0c2e413dfb393319e3ea14dc9848c81b392107fe3382ce1813d278c3394a7f
+)
+
+vcpkg_extract_source_archive(SOURCE_PATH
+    ARCHIVE "${ARCHIVE}"
 )
 
 file(COPY "${CMAKE_CURRENT_LIST_DIR}/configure" DESTINATION "${SOURCE_PATH}")

@@ -1,4 +1,4 @@
-set(DIRECTXTEX_TAG sept2023)
+set(DIRECTXTEX_TAG jun2024)
 
 vcpkg_check_linkage(ONLY_STATIC_LIBRARY)
 
@@ -6,7 +6,7 @@ vcpkg_from_github(
     OUT_SOURCE_PATH SOURCE_PATH
     REPO Microsoft/DirectXTex
     REF ${DIRECTXTEX_TAG}
-    SHA512 b72941496bcd3193409799905cd6b6d0ce79009b222a589257062f830c2ccc16a97166da92ea59a7954d0f60d1fcd704cdb2cb7449697009f9ddeb00e27c4fb8
+    SHA512 5ad160d4279c4b74c5ad29c7d830972ad8b9f8b42c3c0d3d889cc6c98f97c9285cd4c753ffcb88ed23cb40786071ea50917fd273b653f55f497e6ea10181c560
     HEAD_REF main
     )
 
@@ -15,19 +15,33 @@ vcpkg_check_features(
     FEATURES
         dx11 BUILD_DX11
         dx12 BUILD_DX12
+        jpeg ENABLE_LIBJPEG_SUPPORT
         openexr ENABLE_OPENEXR_SUPPORT
+        png ENABLE_LIBPNG_SUPPORT
         spectre ENABLE_SPECTRE_MITIGATION
         tools BUILD_TOOLS
 )
 
-set(EXTRA_OPTIONS -DBUILD_SAMPLE=OFF -DBUILD_TESTING=OFF)
+set(EXTRA_OPTIONS -DBUILD_SAMPLE=OFF)
 
 if(VCPKG_TARGET_IS_WINDOWS AND NOT (VCPKG_TARGET_IS_XBOX OR VCPKG_TARGET_IS_MINGW) AND NOT "dx12" IN_LIST FEATURES)
   list(APPEND EXTRA_OPTIONS "-DCMAKE_DISABLE_FIND_PACKAGE_directx-headers=TRUE")
 endif()
 
 if(VCPKG_TARGET_IS_MINGW AND ("dx11" IN_LIST FEATURES))
-    message(NOTICE "Building ${PORT} for MinGW requires the HLSL Compiler fxc.exe also be in the PATH. See https://aka.ms/windowssdk.")
+  message(NOTICE "Building ${PORT} for MinGW requires the HLSL Compiler fxc.exe also be in the PATH. See https://aka.ms/windowssdk.")
+endif()
+
+if("xbox" IN_LIST FEATURES)
+  if((NOT (DEFINED DIRECTXTEX_XBOX_CONSOLE_TARGET)) OR (DIRECTXTEX_XBOX_CONSOLE_TARGET STREQUAL "scarlett"))
+    list(APPEND FEATURE_OPTIONS "-DBUILD_XBOX_EXTS_SCARLETT=ON")
+    message(NOTICE "Building ${PORT} with Xbox Series X|S extensions")
+  elseif(DIRECTXTEX_XBOX_CONSOLE_TARGET STREQUAL "xboxone")
+    list(APPEND FEATURE_OPTIONS "-DBUILD_XBOX_EXTS_XBOXONE=ON")
+    message(NOTICE "Building ${PORT} with Xbox One extensions")
+  else()
+    message(FATAL_ERROR "The triplet variable DIRECTXTEX_XBOX_CONSOLE_TARGET should be set to 'xboxone' or 'scarlett'.")
+  endif()
 endif()
 
 if (VCPKG_HOST_IS_LINUX)
@@ -40,33 +54,34 @@ vcpkg_cmake_configure(
 )
 
 vcpkg_cmake_install()
+vcpkg_fixup_pkgconfig()
 vcpkg_cmake_config_fixup(CONFIG_PATH share/directxtex)
 
 if("tools" IN_LIST FEATURES)
 
   file(MAKE_DIRECTORY "${CURRENT_PACKAGES_DIR}/tools/directxtex/")
 
-  if((VCPKG_TARGET_ARCHITECTURE STREQUAL x64) AND (NOT ("openexr" IN_LIST FEATURES)))
+  if((VCPKG_TARGET_ARCHITECTURE STREQUAL x64) AND (NOT (("openexr" IN_LIST FEATURES) OR ("xbox" IN_LIST FEATURES))))
 
     vcpkg_download_distfile(
       TEXASSEMBLE_EXE
       URLS "https://github.com/Microsoft/DirectXTex/releases/download/${DIRECTXTEX_TAG}/texassemble.exe"
       FILENAME "texassemble-${DIRECTXTEX_TAG}.exe"
-      SHA512 30d607e0e0a47917731ef5acebb5d4d269b73bf21120cb976e7bf605f7f5941cb23f63a317fb3d4171f0dce1526f8dd4365e9c2f9b1a6503c320b1f88156acc4
+      SHA512 1226bbb29ebe750d4371bf07dfab3511a22c371964cc4b977917466af5619517a6d4ac02a5da2d69676524d17a5c1efabc11328db41515cd7ae911efcb919397
     )
 
     vcpkg_download_distfile(
       TEXCONV_EXE
       URLS "https://github.com/Microsoft/DirectXTex/releases/download/${DIRECTXTEX_TAG}/texconv.exe"
       FILENAME "texconv-${DIRECTXTEX_TAG}.exe"
-      SHA512 43103276b6a8be23c7b429f089f71df5338b8ef32a2f3fe20492d5294886ddbe9a170c6bc1ead7a2da2179ed8e4828262d7072f136b6586af31d2f3249dff97a
+      SHA512 e28e29af20f3703bf88dc43f9dbbad4844c8746a8b22aa74dbe7f0ea8668b263a7798ab99373c61b7ed89efbc31946b0d75dde6acadcc649ad8fde4d78887c2f
     )
 
     vcpkg_download_distfile(
       TEXDIAG_EXE
       URLS "https://github.com/Microsoft/DirectXTex/releases/download/${DIRECTXTEX_TAG}/texdiag.exe"
       FILENAME "texdiag-${DIRECTXTEX_TAG}.exe"
-      SHA512 915aa492b3db2a9787492c8e9ae1b51b175db81b38bca73cd5de2ab815308a5d4e63fb584d02f178939fb816c604996e5036b310b4555ecdc0d1e0640aef7ee0
+      SHA512 b535c9a9f36e35821a300f32dc193493e8e27a262e221d60719bf47e5da8927da50faad6a37995f520c4411af083ed36c2248c60be28e9bd8bdb482f71e8fb50
     )
 
     file(INSTALL
@@ -85,21 +100,21 @@ if("tools" IN_LIST FEATURES)
       TEXASSEMBLE_EXE
       URLS "https://github.com/Microsoft/DirectXTex/releases/download/${DIRECTXTEX_TAG}/texassemble_arm64.exe"
       FILENAME "texassemble-${DIRECTXTEX_TAG}-arm64.exe"
-      SHA512 c2152d5644798c4f5fa929a889e68ae5b6545dfdb3251f066406c1f66c223756ace1744314ec459637ca1b39923ad8bfd34f0bf906c84b7e7d6d7114833b7a84
+      SHA512 18a9022d550a8c9d0a74f1a86749c3c2766f71c23ad93efeab2240f35bfe5dcce575d0f13a1e5bfc4fe1a2abd2903c1b71dc0dcab9c30821710e4f3a2595d674
     )
 
     vcpkg_download_distfile(
       TEXCONV_EXE
       URLS "https://github.com/Microsoft/DirectXTex/releases/download/${DIRECTXTEX_TAG}/texconv_arm64.exe"
       FILENAME "texconv-${DIRECTXTEX_TAG}-arm64.exe"
-      SHA512 15901617f1a2ac94f1eec3b287758e50bf0fad6532940345fd9d13c34372acd27d10f8ba3277f21163f991082dbff14506cb4d7068179b5807755d818f98e27d
+      SHA512 27d92c44cd34421ba2c79da83a817c16ad67091286be3d64ad90dd0a3ceaf59c92c8268fe12293adbd6e84a22647eb50e74ec933365d5bf04a7bf391a9e13150
     )
 
     vcpkg_download_distfile(
       TEXDIAG_EXE
       URLS "https://github.com/Microsoft/DirectXTex/releases/download/${DIRECTXTEX_TAG}/texdiag_arm64.exe"
       FILENAME "texdiag-${DIRECTXTEX_TAG}-arm64.exe"
-      SHA512 cc110a34428a7a7694f890bae6f68d001c2e8bcb85edfe335d9cad299e0205ef2bd786392cd391681ca1f1c0043b869c424a705a182466230f6f683b77c47c3e
+      SHA512 c179b7729bce61a20268fe69814fc3764104902748f98567e00c8d50860d515b94b1806caed4b07c76da1ddbb43390fa2d6c9cb33ad404456e05fde2b48a52a1
     )
 
     file(INSTALL
@@ -116,7 +131,7 @@ if("tools" IN_LIST FEATURES)
 
     vcpkg_copy_tools(
           TOOL_NAMES texassemble texconv texdiag
-          SEARCH_DIR "${CURRENT_BUILDTREES_DIR}/${TARGET_TRIPLET}-rel/bin/CMake"
+          SEARCH_DIR "${CURRENT_BUILDTREES_DIR}/${TARGET_TRIPLET}-rel/bin"
       )
 
   endif()

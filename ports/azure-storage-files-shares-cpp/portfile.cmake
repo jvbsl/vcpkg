@@ -1,8 +1,12 @@
+# NOTE: All changes made to this file will get overwritten by the next port release.
+# Please contribute your changes to https://github.com/Azure/azure-sdk-for-cpp.
+
 vcpkg_from_github(
     OUT_SOURCE_PATH SOURCE_PATH
     REPO Azure/azure-sdk-for-cpp
-    REF azure-storage-files-shares_12.7.0
-    SHA512 2482a7c437bd36e63efc8c77d917a09d73bde2bc12d49afd1e24cf0977656e991c59c15d34b52c1bd19c6988fe7c40c95b5edea8740977ffc676f3dd6758dc5e
+    REF "azure-storage-files-shares_${VERSION}"
+    SHA512 b0613bc6fa207f2d94d5694d7c4c174e6088ea2fa7eba80b6b373e99bd0e44efab4f97009eeec3ccbdc65dd279f19ecea5b0277ec424b1539b541ba512f5a32d
+    HEAD_REF main
 )
 
 if(EXISTS "${SOURCE_PATH}/sdk/storage/azure-storage-files-shares")

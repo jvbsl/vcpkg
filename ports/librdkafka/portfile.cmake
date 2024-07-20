@@ -1,8 +1,8 @@
 vcpkg_from_github(
     OUT_SOURCE_PATH SOURCE_PATH
-    REPO edenhill/librdkafka
+    REPO confluentinc/librdkafka
     REF "v${VERSION}"
-    SHA512 1a85b5864efdeece1327e461b62a378f24b73eb7174168f630aeff01d4a5074d6b2f15744bc267665fcfc6384e804df00c20b7271ecd85a98dca84746b86b4d9
+    SHA512 a68b7382ec5a9afc0eb8513e97d8563c599021d774f7790a61af80565600678a497e4957dcdd823f8b9a426a19b9c5392cacd42d02d70493d993319f3343fe96
     HEAD_REF master
     PATCHES
         lz4.patch
@@ -13,6 +13,8 @@ string(COMPARE EQUAL "${VCPKG_LIBRARY_LINKAGE}" "static" RDKAFKA_BUILD_STATIC)
 vcpkg_check_features(OUT_FEATURE_OPTIONS FEATURE_OPTIONS
     FEATURES
         ssl     WITH_SSL
+        ssl     WITH_SASL_OAUTHBEARER
+        ssl     WITH_SASL_SCRAM
         zlib    WITH_ZLIB
         zstd    WITH_ZSTD
         snappy  WITH_SNAPPY
@@ -66,7 +68,7 @@ if(VCPKG_LIBRARY_LINKAGE STREQUAL static)
 endif()
 
 # Handle copyright
-configure_file("${SOURCE_PATH}/LICENSES.txt" "${CURRENT_PACKAGES_DIR}/share/${PORT}/copyright" COPYONLY)
+vcpkg_install_copyright(FILE_LIST "${SOURCE_PATH}/LICENSES.txt" )
 
 # Install usage
 configure_file("${CMAKE_CURRENT_LIST_DIR}/usage" "${CURRENT_PACKAGES_DIR}/share/${PORT}/usage" @ONLY)

@@ -1,29 +1,28 @@
-# This port needs to be updated at the same time as mongo-c-driver
-
-vcpkg_minimum_required(VERSION 2022-10-12) # for ${VERSION}
-
 vcpkg_from_github(
     OUT_SOURCE_PATH SOURCE_PATH
     REPO mongodb/mongo-c-driver
     REF "${VERSION}"
-    SHA512 242416638bf6722ccda67ecc15cf78f8531f1a4ae0e89fd66cde74221d7b98b859442f5b70628802972961e69156fd7afcc916d7a83cc134d5723eb0b6e15cc9
+    SHA512 b22fd88084e0fead31faf47b505d7e38dff20e0b65c18f38c2d089807d2ed4a28f23d02fc429e80b0c3ef1bdd5f653b2399701389b3a29d305d96e99bebc3943
     HEAD_REF master
     PATCHES
-        disable-dynamic-when-static.patch
         fix-include-directory.patch # vcpkg legacy decision
-        fix-missing-header.patch  # for building mongo-c-driver
 )
 file(WRITE "${SOURCE_PATH}/VERSION_CURRENT" "${VERSION}")
 
 # Cannot use string(COMPARE EQUAL ...)
 set(ENABLE_STATIC OFF)
+set(ENABLE_SHARED OFF)
 if(VCPKG_LIBRARY_LINKAGE STREQUAL "static")
     set(ENABLE_STATIC ON)
+else()
+    set(ENABLE_SHARED ON)
 endif()
 
 vcpkg_cmake_configure(
     SOURCE_PATH "${SOURCE_PATH}"
+    DISABLE_PARALLEL_CONFIGURE # because it writes the file VERSION_CURRENT in the source directory
     OPTIONS
+        "-DBUILD_VERSION=${VERSION}"
         -DENABLE_BSON=ON
         -DENABLE_EXAMPLES=OFF
         -DENABLE_ICU=OFF
@@ -33,10 +32,15 @@ vcpkg_cmake_configure(
         -DENABLE_SRV=OFF
         -DENABLE_SSL=OFF
         -DENABLE_STATIC=${ENABLE_STATIC}
+        -DENABLE_SHARED=${ENABLE_SHARED}
         -DENABLE_TESTS=OFF
         -DENABLE_UNINSTALL=OFF
         -DENABLE_ZLIB=SYSTEM
         -DENABLE_ZSTD=OFF
+        -DCMAKE_DISABLE_FIND_PACKAGE_Python=ON
+        -DCMAKE_DISABLE_FIND_PACKAGE_Python3=ON
+    MAYBE_UNUSED_VARIABLES
+        ENABLE_ICU
 )
 vcpkg_cmake_install()
 vcpkg_copy_pdbs()
