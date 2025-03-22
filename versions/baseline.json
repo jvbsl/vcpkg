@@ -5946,7 +5946,7 @@
     },
     "mcpp": {
       "baseline": "2.7.2.14",
-      "port-version": 5
+      "port-version": 6
     },
     "md4c": {
       "baseline": "0.5.2",
@@ -10202,6 +10202,10 @@
     },
     "zeroc-ice": {
       "baseline": "3.7.10",
+      "port-version": 1
+    },
+    "zeroc-ice-mcpp": {
+      "baseline": "2023-09-08",
       "port-version": 0
     },
     "zeromq": {
